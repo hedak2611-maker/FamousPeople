@@ -1,5 +1,13 @@
 
 const PEOPLE = [
+   {
+    name:  "Shivansh Agarwal",
+    field: "Physics",
+    known: "Theory of Nothing",
+    years: "1879 – 1955",
+    emoji: "⚛️",
+    fact:  "He speaks a lot."
+  },
   {
     name:  "Albert Einstein",
     field: "Physics",
