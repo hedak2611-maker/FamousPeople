@@ -4,7 +4,7 @@ A website that shows a random famous person every time you visit or click "Next 
 
 ## ✏️ How to Add / Remove People
 
-**Only edit `data.js`** — that's the only file you ever need to touch!
+
 
 ```js
 // data.js
