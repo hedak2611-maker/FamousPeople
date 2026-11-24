@@ -1,7 +1,15 @@
 pipeline:
   name: Famous People — CI Pipeline
   image: node:20-alpine
+  
+ branches:
+    - main      # Only run CI on main branch — never on gh-pages deploy branch
 
+  deploy:
+    provider: github-pages
+    directory: .
+    branch: gh-pages
+    
   steps:
     - name: Check required files exist
       run: |
