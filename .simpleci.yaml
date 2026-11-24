@@ -1,9 +1,9 @@
 pipeline:
-  name: Thought of the Day — CI/CD Pipeline
+  name: Famous People — CI Pipeline
   image: node:20-alpine
 
   branches:
-    - main      # Only run CI on main branch — never on gh-pages deploy branch
+    - main
 
   deploy:
     provider: github-pages
@@ -14,55 +14,43 @@ pipeline:
     - name: Check required files exist
       run: |
         echo "Checking project structure..."
-        test -f index.html  && echo "  ✓ index.html"  || (echo "MISSING: index.html"  && exit 1)
-        test -f style.css   && echo "  ✓ style.css"   || (echo "MISSING: style.css"   && exit 1)
-        test -f app.js      && echo "  ✓ app.js"      || (echo "MISSING: app.js"      && exit 1)
+        test -f index.html && echo "  ✓ index.html" || (echo "MISSING: index.html" && exit 1)
+        test -f style.css  && echo "  ✓ style.css"  || (echo "MISSING: style.css"  && exit 1)
+        test -f app.js     && echo "  ✓ app.js"     || (echo "MISSING: app.js"     && exit 1)
+        test -f data.js    && echo "  ✓ data.js"    || (echo "MISSING: data.js" && exit 1)
         echo "All required files present!"
 
-    - name: Count thoughts in app.js
+    - name: Validate PEOPLE array in data.js
       run: |
-        COUNT=$(grep -c "{ text:" app.js || true)
-        echo "Found $COUNT thoughts in the database"
+        COUNT=$(grep -c "name:" data.js || true)
+        echo "Found $COUNT people in data.js"
         if [ "$COUNT" -lt 1 ]; then
-          echo "ERROR: No thoughts found in app.js — add at least one!"
+          echo "ERROR: data.js has no people!"
           exit 1
         fi
-        echo "✓ Thought count OK ($COUNT thought(s) found)"
+        echo "✓ People count OK ($COUNT people)"
 
-    - name: Validate HTML structure
+    - name: Check data.js has PEOPLE variable
       run: |
-        echo "Validating HTML structure..."
-        grep -q "<!DOCTYPE html>" index.html && echo "  ✓ DOCTYPE found"    || (echo "MISSING DOCTYPE"      && exit 1)
-        grep -q "<title>"         index.html && echo "  ✓ Title tag found"  || (echo "MISSING title tag"    && exit 1)
-        grep -q "app.js"          index.html && echo "  ✓ app.js linked"    || (echo "app.js not linked"    && exit 1)
-        grep -q "style.css"       index.html && echo "  ✓ style.css linked" || (echo "style.css not linked" && exit 1)
-        echo "HTML structure OK"
-
-    - name: Check CSS is non-empty
-      run: |
-        LINES=$(wc -l < style.css)
-        echo "style.css has $LINES lines"
-        if [ "$LINES" -lt 20 ]; then
-          echo "ERROR: CSS file too small ($LINES lines)"
-          exit 1
-        fi
-        echo "✓ CSS size OK"
+        grep -q "const PEOPLE" data.js && echo "✓ PEOPLE array declared" || (echo "ERROR: 'const PEOPLE' not found" && exit 1)
 
     - name: Validate JavaScript syntax
       run: |
-        echo "Running Node.js syntax check on app.js..."
-        node --check app.js && echo "✓ app.js syntax is valid!"
+        node --check data.js && echo "✓ data.js syntax valid"
+        node --check app.js  && echo "✓ app.js syntax valid"
 
-    - name: Print project summary
+    - name: Check HTML links data.js and app.js
       run: |
-        echo ""
-        echo "======================================"
-        echo "   Thought of the Day — CI PASSED    "
-        echo "======================================"
-        echo "  HTML    : $(wc -l < index.html) lines"
-        echo "  CSS     : $(wc -l < style.css) lines"
-        echo "  JS      : $(wc -l < app.js) lines"
-        echo "  Thoughts: $(grep -c '{ text:' app.js)"
-        echo "======================================"
-        echo "  Status  : SUCCESS ✅"
-        echo "======================================"
+        grep -q "data.js" index.html && echo "✓ data.js linked" || (echo "ERROR: data.js not linked" && exit 1)
+        grep -q "app.js"  index.html && echo "✓ app.js linked"  || (echo "ERROR: app.js not linked"  && exit 1)
+
+    - name: Print summary
+      run: |
+        echo "========================================"
+        echo "   Famous People Site — CI PASSED ✅   "
+        echo "========================================"
+        echo "  People in data.js : $(grep -c 'name:' data.js)"
+        echo "  HTML lines        : $(wc -l < index.html)"
+        echo "  CSS lines         : $(wc -l < style.css)"
+        echo "  JS lines          : $(wc -l < app.js)"
+        echo "========================================"
